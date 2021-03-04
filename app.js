@@ -1,8 +1,20 @@
 const express = require("express");
 const app = express();
+const session = require("express-session");
 const bodyParser = require("body-parser");
 const loginRouter = require("./routes/login");
+const adminRouter = require("./routes/admin");
 
+app.use(
+  session({
+    secret: "secret key",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000,
+    },
+  })
+);
 // CORS & Preflight request
 app.use((req, res, next) => {
   if (req.path !== "/" && !req.path.includes(".")) {
@@ -19,7 +31,8 @@ app.use((req, res, next) => {
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use("/login", loginRouter);
+app.use("/pk", loginRouter);
+app.use("/admin", adminRouter);
 
 app.listen(3000, function () {
   console.log("i m running on the 3000 port");

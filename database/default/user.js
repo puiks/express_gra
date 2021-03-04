@@ -1,40 +1,86 @@
 const pool = require("../dbconfig");
+const moment = require("moment");
 
-const login = function (loginInfo) {
-  let result = null;
-  switch (loginInfo.loginType) {
-    case 0:
+class UserController {
+  login(loginInfo) {
+    return new Promise(function (resolve, reject) {
       pool.getConnection((err, connection) => {
+        if (loginInfo.loginType === 0) {
+          connection.query(
+            `select * from user where username=${loginInfo.username} and password = ${loginInfo.password}`,
+            function (err, res) {
+              if (err) return false;
+              resolve(res);
+              connection.release();
+            }
+          );
+        } else if (loginInfo.loginType === 1) {
+          connection.query(
+            `select * from user where telephone=${loginInfo.telephone} and password = ${loginInfo.password}`,
+            function (err, res) {
+              if (err) return false;
+              resolve(res);
+              connection.release();
+            }
+          );
+        } else {
+          connection.query(
+            `select * from user where email=${loginInfo.email} and password = ${loginInfo.password}`,
+            function (err, res) {
+              if (err) return false;
+              resolve(res);
+              connection.release();
+            }
+          );
+        }
+      });
+    });
+  }
+
+  register(userInfo) {
+    return new Promise(function (resolve, reject) {
+      const today = moment().format("YYYY-MM-DD");
+      pool.getConnection((err, connection) => {
+        if (err) reject(err);
         connection.query(
-          `select * from user where username=${loginInfo.username} and password = ${loginInfo.password}`,
-          function (err, res) {
-            if (err) return false;
-            result = res;
+          `select * from user where username = ${userInfo.username}`,
+          function (err, result) {
+            if (err) reject(err);
+            if (result.length !== 0) {
+              resolve("exist");
+            } else {
+              connection.query(
+                `insert into user (username,password,email,telephone,sex,type,state,registerDate) values ('${userInfo.username}','${userInfo.password}','${userInfo.email}','${userInfo.telephone}','${userInfo.sex}','0','0','${today}')`,
+                (err, result) => {
+                  if (err) reject(err);
+                  resolve(result);
+                }
+              );
+            }
             connection.release();
           }
         );
       });
-      break;
-      // case 1:
-      //     result = await this.app.mysql.select('user', {
-      //         where: {
-      //             telephone: userInfo.telephone,
-      //             password: userInfo.password
-      //         }
-      //     });
-      //     break;
-      // case 2:
-      //     result = await this.app.mysql.select('user', {
-      //         where: {
-      //             email: userInfo.email,
-      //             password: userInfo.password
-      //         }
-      //     });
-      //     break;
-      return result;
+    });
   }
-};
 
-module.exports = {
-  login,
-};
+  resetPassword(userInfo) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err);
+        else {
+          connection.query(
+            `update user set password = ${userInfo.password} where id = ${userInfo.id}`,
+            (err, result) => {
+              if (err) reject(err);
+              else resolve(result);
+            }
+          );
+        }
+        connection.release();
+      });
+    });
+  }
+}
+
+module.exports = new UserController();
