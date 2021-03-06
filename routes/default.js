@@ -1,6 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const { login, register, resetPassword } = require("../database/default/user");
+const songListRouter = require("./default/songList");
+const boardRouter = require("./default/board");
+const commentRouter = require("./default/comment");
+const artistRouter = require("./default/artist");
+
+router.use("/songList", songListRouter);
+router.use("/board", boardRouter);
+router.use("/comment", commentRouter);
+router.use("/artist", artistRouter);
 
 router.post("/login", async (req, res) => {
   let loginInfo = req.body;

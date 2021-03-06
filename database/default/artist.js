@@ -1,12 +1,11 @@
-const { connect } = require("../../routes/default");
 const pool = require("../dbconfig");
-class UserBoardController {
-  getAllBoards(offset) {
+class UserArtistController {
+  getAllArtist(offset) {
     return new Promise(function (resolve, reject) {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select * from board limit 10 offset ${offset} `,
+          `select * from artists limit 10 offset = ${offset}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);
@@ -16,12 +15,12 @@ class UserBoardController {
       });
     });
   }
-  selectBoardByTitle(title, offset) {
+  selectArtistByName(offset, name) {
     return new Promise(function (resolve, reject) {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select * from board limit 10 offset ${offset} where title like "%${title}%"`,
+          `select * from artists limit 10 offset ${offset} where name like "%${name}%"`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);
@@ -31,12 +30,12 @@ class UserBoardController {
       });
     });
   }
-  selectBoardById(id) {
+  selectArtistByType(type, offset) {
     return new Promise(function (resolve, reject) {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select * from board where id = ${id}`,
+          `select * from artist limit 10 offset ${offset} where id = type`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);
@@ -48,4 +47,4 @@ class UserBoardController {
   }
 }
 
-module.exports = new UserBoardController();
+module.exports = new UserArtistController();

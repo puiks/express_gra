@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const session = require("express-session");
 const bodyParser = require("body-parser");
-const loginRouter = require("./routes/login");
+const userRouter = require("./routes/default");
 const adminRouter = require("./routes/admin");
 
 app.use(
@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use("/pk", loginRouter);
+app.use("/user", userRouter);
 app.use("/admin", adminRouter);
 
 app.listen(3000, function () {

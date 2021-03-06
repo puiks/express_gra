@@ -1,6 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const userListRouter = require("./admin/userList");
+const commentRouter = require("./admin/comment");
+const songListRouter = require("./admin/songList");
+const artistRouter = require("./admin/artist");
+const boardRouter = require("./admin/board");
 router.use("/userList", userListRouter);
-
+router.use("/comment", commentRouter);
+router.use("/songList", songListRouter);
+router.use("/artist", artistRouter);
+router.use("/board", boardRouter);
 module.exports = router;

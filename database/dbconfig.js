@@ -8,6 +8,6 @@ const dbconfig = {
   connectionLimit: 20,
   timezone: "SYSTEM",
 };
-const conn = mysql.createPool(dbconfig);
+const pool = mysql.createPool(dbconfig);
 
-module.exports = conn;
+module.exports = pool;

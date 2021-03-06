@@ -48,16 +48,17 @@ class UserController {
             if (err) reject(err);
             if (result.length !== 0) {
               resolve("exist");
+              connection.release();
             } else {
               connection.query(
                 `insert into user (username,password,email,telephone,sex,type,state,registerDate) values ('${userInfo.username}','${userInfo.password}','${userInfo.email}','${userInfo.telephone}','${userInfo.sex}','0','0','${today}')`,
                 (err, result) => {
                   if (err) reject(err);
                   resolve(result);
+                  connection.release();
                 }
               );
             }
-            connection.release();
           }
         );
       });
@@ -73,11 +74,11 @@ class UserController {
             `update user set password = ${userInfo.password} where id = ${userInfo.id}`,
             (err, result) => {
               if (err) reject(err);
-              else resolve(result);
+              resolve(result);
+              connection.release();
             }
           );
         }
-        connection.release();
       });
     });
   }
