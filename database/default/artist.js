@@ -5,7 +5,7 @@ class UserArtistController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select * from artists limit 10 offset = ${offset}`,
+          `select * from artists limit 10 offset ${offset}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);
@@ -20,7 +20,7 @@ class UserArtistController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select * from artists limit 10 offset ${offset} where name like "%${name}%"`,
+          `select * from artists where name like "%${name}%" limit 10 offset ${offset}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);
@@ -35,7 +35,7 @@ class UserArtistController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select * from artist limit 10 offset ${offset} where id = type`,
+          `select * from artist where id = ${type} limit 10 offset ${offset}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);

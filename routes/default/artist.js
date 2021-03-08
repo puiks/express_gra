@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const {
-  getAllArtists,
+  getAllArtist,
   selectArtistByName,
   selectArtistByType,
 } = require("../../database/default/artist");
 
 router.get("/getAllArtists", async (req, res) => {
   const { offset } = req.query;
-  const data = await getAllArtists(offset);
+  const data = await getAllArtist(offset);
   res.send({
     data,
   });

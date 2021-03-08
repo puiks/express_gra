@@ -1,4 +1,3 @@
-const { connect } = require("../../routes/default");
 const pool = require("../dbconfig");
 class UserBoardController {
   getAllBoards(offset) {
@@ -21,7 +20,7 @@ class UserBoardController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select * from board limit 10 offset ${offset} where title like "%${title}%"`,
+          `select * from board where title like "%${title}%" limit 10 offset ${offset}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);

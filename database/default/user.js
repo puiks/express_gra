@@ -82,6 +82,83 @@ class UserController {
       });
     });
   }
+  getSubscribeCount(id) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err);
+        connection.query(
+          `select COUNT(*) from subscribe where tarUserId = ${id}`,
+          (err, result1) => {
+            if (err) reject(err);
+            connection.query(
+              `select COUNT(*) from subscribe where srcUserId = ${id}`,
+              (err, result2) => {
+                if (err) reject(err);
+                resolve({
+                  fans: result1[0]["COUNT(*)"],
+                  subscribe: result2[0]["COUNT(*)"],
+                });
+                connection.release();
+              }
+            );
+          }
+        );
+      });
+    });
+  }
+  SubScribeOthers(srcId, TarId) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err);
+        connection.query(
+          `select * from subscribe where srcUserId = ${srcId} and tarUserId = ${TarId}`,
+          (err, result) => {
+            if (err) reject(err);
+            if (result.length) {
+              connection.query(
+                `update subscribe set state = 0 where srcUserId = ${srcId} and tarUserId = ${TarId}`,
+                (err, result2) => {
+                  if (err) reject(err);
+                  resolve(result2);
+                  connection.release();
+                }
+              );
+            }
+          }
+        );
+      });
+    });
+  }
+  getSubScribe(id, offset) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err);
+        connection.query(
+          `select * from subscribe,user where subscribe.srcUserId = ${id} and subscribe.srcUserId = user.id limit 10 offset ${offset}`,
+          (err, result) => {
+            if (err) reject(err);
+            resolve(result);
+            connection.release();
+          }
+        );
+      });
+    });
+  }
+  getFans(id, offset) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err);
+        connection.query(
+          `select * from subscribe,user where subscribe.tarUserId = ${id} and subscribe.tarUserId = user.id limit 10 offset ${offset}`,
+          (err, result) => {
+            if (err) reject(err);
+            resolve(result);
+            connection.release();
+          }
+        );
+      });
+    });
+  }
 }
 
 module.exports = new UserController();

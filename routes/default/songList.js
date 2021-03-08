@@ -6,10 +6,14 @@ const {
   getSongListById,
   updateSongList,
   addSongList,
+  collectSongList,
+  unCollectSongList,
 } = require("../../database/default/songList");
 
 router.get("/getAllSongLists", async (req, res) => {
-  const result = await getAllSongLists();
+  const { offset, type } = req.query;
+  console.log(type);
+  const result = await getAllSongLists(offset, type);
   res.send({
     status: 200,
     desc: "获取成功",
@@ -49,6 +53,43 @@ router.post("/addSongList", async (req, res) => {
     res.send({
       status: 204,
       desc: "添加成功",
+    });
+  } else {
+    res.send({
+      status: 500,
+      desc: "添加失败",
+    });
+  }
+});
+
+router.post("/collectSongList", async (req, res) => {
+  const { slid, uid } = req.query;
+  const result = await collectSongList(slid, uid);
+  if (result.affectedRows !== 0) {
+    res.send({
+      status: 204,
+      desc: "添加成功",
+    });
+  } else {
+    res.send({
+      status: 500,
+      desc: "添加失败",
+    });
+  }
+});
+
+router.delete("/unCollectSongList", async (req, res) => {
+  const { slid, uid } = req.query;
+  const result = await unCollectSongList(slid, uid);
+  if (result.affectedRows !== 0) {
+    res.send({
+      status: 204,
+      desc: "添加成功",
+    });
+  } else {
+    res.send({
+      status: 500,
+      desc: "添加失败",
     });
   }
 });

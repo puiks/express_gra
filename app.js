@@ -1,9 +1,17 @@
 const express = require("express");
 const app = express();
 const session = require("express-session");
+const fs = require("fs");
+const path = require("path");
 const bodyParser = require("body-parser");
+const cache = require("./util/apicache").middleware;
+const { cookieToJson } = require("./util/index");
+const request = require("./util/request");
+
+//router
 const userRouter = require("./routes/default");
 const adminRouter = require("./routes/admin");
+const authGuard = require("./middleware/authGuard");
 
 app.use(
   session({
@@ -29,8 +37,64 @@ app.use((req, res, next) => {
   req.method === "OPTIONS" ? res.status(204).end() : next();
 });
 
+// cookie parser
+app.use((req, res, next) => {
+  req.cookies = {};
+  (req.headers.cookie || "").split(/\s*;\s*/).forEach((pair) => {
+    let crack = pair.indexOf("=");
+    if (crack < 1 || crack == pair.length - 1) return;
+    req.cookies[
+      decodeURIComponent(pair.slice(0, crack)).trim()
+    ] = decodeURIComponent(pair.slice(crack + 1)).trim();
+  });
+  next();
+});
+
+// app.use("/", authGuard);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// cache处理;
+app.use(cache("2 minutes", (req, res) => res.statusCode === 200));
+
+fs.readdirSync(path.join(__dirname, "module"))
+  .reverse()
+  .forEach((file) => {
+    if (!file.endsWith(".js")) return;
+    let route = "/" + file.replace(/\.js$/i, "").replace(/_/g, "/");
+    // 引入真正的请求地址
+    let realRequest = require(path.join(__dirname, "module", file));
+
+    app.use(route, (req, res) => {
+      if (typeof req.query.cookie === "string") {
+        req.query.cookie = cookieToJson(req.query.cookie);
+      }
+      let query = Object.assign(
+        {},
+        { cookie: req.cookies },
+        req.query,
+        req.body,
+        req.files
+      );
+
+      realRequest(query, request)
+        .then((answer) => {
+          console.log("[OK]", decodeURIComponent(req.originalUrl));
+          res.append("Set-Cookie", answer.cookie);
+          res.status(answer.status).send(answer.body);
+        })
+        .catch((answer) => {
+          console.log("[ERR]", decodeURIComponent(req.originalUrl), {
+            status: answer.status,
+            body: answer.body,
+          });
+          if (answer.body.code == "301") answer.body.msg = "需要登录";
+          res.append("Set-Cookie", answer.cookie);
+          res.status(answer.status).send(answer.body);
+        });
+    });
+  });
+
 app.use("/user", userRouter);
 app.use("/admin", adminRouter);
 

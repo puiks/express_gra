@@ -1,4 +1,3 @@
-const { connect } = require("../../routes/admin");
 const pool = require("../dbconfig");
 class AdminArtistController {
   deleteArtist(singer) {
