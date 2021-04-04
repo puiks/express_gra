@@ -8,6 +8,10 @@ const {
   addSongList,
   collectSongList,
   unCollectSongList,
+  getMySongList,
+  getCollectSongList,
+  addSongIntoSongList,
+  getSongListByName,
 } = require("../../database/default/songList");
 
 router.get("/getAllSongLists", async (req, res) => {
@@ -47,9 +51,9 @@ router.put("/updateSongList", async (req, res) => {
 });
 
 router.post("/addSongList", async (req, res) => {
-  const { songs, ...songList } = req.body;
-  const result = await addSongList(songList, songs);
-  if (result.success) {
+  const { title, userInfo } = req.body;
+  const result = await addSongList(title, userInfo);
+  if (result.affectedRows !== 0) {
     res.send({
       status: 204,
       desc: "添加成功",
@@ -92,6 +96,49 @@ router.delete("/unCollectSongList", async (req, res) => {
       desc: "添加失败",
     });
   }
+});
+
+router.get("/getMySongList", async (req, res) => {
+  const { id } = req.query;
+  const data = await getMySongList(id);
+  res.send({
+    mySongList: data,
+    status: 200,
+  });
+});
+
+router.get("/getCollectSongList", async (req, res) => {
+  const { id } = req.query;
+  const data = await getCollectSongList(id);
+  res.send({
+    status: 200,
+    collectSongList: data,
+  });
+});
+
+router.post("/addSongIntoSongList", async (req, res) => {
+  const { slid, id } = req.query;
+  const data = await addSongIntoSongList(slid, id);
+  if (data.affectedRows !== 200) {
+    res.send({
+      status: 204,
+      desc: "添加成功",
+    });
+  } else {
+    res.send({
+      status: 500,
+      desc: "添加失败",
+    });
+  }
+});
+
+router.get("/getSongListByName", async (req, res) => {
+  const { name } = req.query;
+  const result = await getSongListByName(name);
+  res.send({
+    songList: result,
+    status: 200,
+  });
 });
 
 module.exports = router;

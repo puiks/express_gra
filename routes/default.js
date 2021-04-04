@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const mailCode = require("../util/mailcode");
 const {
   login,
   register,
@@ -8,7 +9,15 @@ const {
   SubScribeOthers,
   getFans,
   getSubScribe,
+  uploadAvatar,
+  getUserInfo,
 } = require("../database/default/user");
+
+let authCode = null;
+let ntime = null;
+let formidable = require("formidable");
+let path = require("path");
+
 const songListRouter = require("./default/songList");
 const boardRouter = require("./default/board");
 const commentRouter = require("./default/comment");
@@ -57,6 +66,44 @@ router.post("/register", async (req, res) => {
       status: "501",
       desc: "注册失败",
     });
+  }
+});
+
+router.get("/mailCode", async (req, res) => {
+  const { mail } = req.query;
+  code = Math.floor(Math.random() * 1000000); // 验证码
+  console.log(code);
+  time = new Date().getTime(); // 存入验证码生成时的时间戳
+  const result = await mailCode(
+    mail,
+    "请查收验证码",
+    "您的验证码是: " + code + ",一分钟内有效"
+  );
+  res.send({
+    status: 200,
+    desc: "已发送",
+  });
+});
+
+router.get("/authCode", async (req, res) => {
+  const { code, time } = req.query;
+  if (time - ntime >= 60 * 1000) {
+    res.send({
+      status: 403,
+      desc: "验证码已过期，请重新获取",
+    });
+  } else {
+    if (code === authCode) {
+      res.send({
+        status: 204,
+        desc: "验证成功",
+      });
+    } else {
+      res.send({
+        status: 500,
+        desc: "验证码错误",
+      });
+    }
   }
 });
 
@@ -128,4 +175,40 @@ router.get("/getSubscribe", async (req, res) => {
   });
 });
 
+router.post("/uploadAvatar", (req, res) => {
+  let form = new formidable.IncomingForm();
+  form.encoding = "utf-8"; // 编码
+  // 保留扩展名
+  form.keepExtensions = true;
+  //文件存储路径 最后要注意加 '/' 否则会被存在public下
+  form.uploadDir = path.join(__dirname, "../public/images/");
+  // 解析 formData 数据
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) return next(err);
+    console.log(fields);
+    console.log(files);
+    let imgPath = files.avatar.path;
+    let imgName = files.avatar.name;
+    // let realName = imgPath.split(`public\\`)[1]
+    const result = await uploadAvatar(req.query.id, "/images/" + imgName);
+    // 返回路径和文件名
+    if (result.affectedRows !== 0) {
+      res.send({ code: 1, data: { name: imgName, path: imgPath } });
+    } else {
+      res.send({
+        status: "上传失败",
+      });
+    }
+  });
+});
+
+router.get("/getSelfInfo", async (req, res) => {
+  let { id } = req.query;
+  const data = await getUserInfo(id);
+  res.send({
+    status: 200,
+    data: data,
+  });
+});
 module.exports = router;

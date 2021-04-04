@@ -74,25 +74,17 @@ class UserSongListController {
       });
     });
   }
-  addSongList(songList, songs) {
+  addSongList(title, userInfo) {
     return new Promise(function (resolve, reject) {
       const today = moment().format("YYYY-MM-DD");
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `insert into songlist (slname,ownerid,ownername,desc,createTime,type,state) VALUES (${songlist.slname},${songlist.ownerid},${songlist.ownername},${songlist.desc},${today},${songlist.type},0)`,
+          `insert into songlist (slname,ownerid,ownername,createTime,state,picUrl) VALUES ('${title}',${userInfo.ownerid},'${userInfo.ownername}','${today}',0,'https://www.hualigs.cn/image/604ccd6f99c05.jpg')`,
           (err, result1) => {
             if (err) reject(err);
-            let sql = `insert into stosl (slid,sid) values `;
-            songs.forEach((item) => {
-              sql += `(${result1.insertId},${item}),`;
-            });
-            sql = sql.substr(0, sql.length - 1);
-            connection.query(sql, (err) => {
-              if (err) reject(err);
-              resolve({ success: true });
-              connection.release();
-            });
+            resolve(result1);
+            connection.release();
           }
         );
       });
@@ -136,6 +128,66 @@ class UserSongListController {
         if (err) reject(err);
         connection.query(
           `update sltouser set state = 1 where slid = ${slid} and uid = ${uid}`,
+          (err, result) => {
+            if (err) reject(err);
+            resolve(result);
+            connection.release();
+          }
+        );
+      });
+    });
+  }
+  getMySongList(id) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err);
+        connection.query(
+          `select * from songlist where ownerid = ${id}`,
+          (err, result) => {
+            if (err) reject(err);
+            resolve(result);
+            connection.release();
+          }
+        );
+      });
+    });
+  }
+  getCollectSongList(id) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err);
+        connection.query(
+          `select * from sltouser, songlist where sltouser.uid = ${id} and sltouser.slid = songlist.id`,
+          (err, result) => {
+            if (err) reject(err);
+            resolve(result);
+            connection.release();
+          }
+        );
+      });
+    });
+  }
+  addSongIntoSongList(slid, id) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err);
+        connection.query(
+          `insert into stosl (slid,sid,state) values (${slid},${id},0)`,
+          (err, result) => {
+            if (err) reject(err);
+            resolve(result);
+            connection.release();
+          }
+        );
+      });
+    });
+  }
+  getSongListByName(name, offset) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err);
+        connection.query(
+          `select * from songList where slname like '%${name}%' limit 10 offset ${offset}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);

@@ -7,7 +7,7 @@ class UserController {
       pool.getConnection((err, connection) => {
         if (loginInfo.loginType === 0) {
           connection.query(
-            `select * from user where username=${loginInfo.username} and password = ${loginInfo.password}`,
+            `select * from user where username='${loginInfo.username}' and password = '${loginInfo.password}'`,
             function (err, res) {
               if (err) return false;
               resolve(res);
@@ -16,7 +16,7 @@ class UserController {
           );
         } else if (loginInfo.loginType === 1) {
           connection.query(
-            `select * from user where telephone=${loginInfo.telephone} and password = ${loginInfo.password}`,
+            `select * from user where telephone=${loginInfo.telephone} and password = '${loginInfo.password}'`,
             function (err, res) {
               if (err) return false;
               resolve(res);
@@ -25,7 +25,7 @@ class UserController {
           );
         } else {
           connection.query(
-            `select * from user where email=${loginInfo.email} and password = ${loginInfo.password}`,
+            `select * from user where email='${loginInfo.email}' and password = $'{loginInfo.password}'`,
             function (err, res) {
               if (err) return false;
               resolve(res);
@@ -153,6 +153,36 @@ class UserController {
           (err, result) => {
             if (err) reject(err);
             resolve(result);
+            connection.release();
+          }
+        );
+      });
+    });
+  }
+  uploadAvatar(id, url) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err);
+        connection.query(
+          `update user set avatar = '${url}' where id = ${id}`,
+          (err, result) => {
+            if (err) reject(err);
+            resolve(result);
+            connection.release();
+          }
+        );
+      });
+    });
+  }
+  getUserInfo(id) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err);
+        connection.query(
+          `select * from user where id = ${id}`,
+          (err, result) => {
+            if (err) reject(err);
+            resolve(result[0]);
             connection.release();
           }
         );

@@ -7,12 +7,12 @@ const bodyParser = require("body-parser");
 const cache = require("./util/apicache").middleware;
 const { cookieToJson } = require("./util/index");
 const request = require("./util/request");
-
 //router
 const userRouter = require("./routes/default");
 const adminRouter = require("./routes/admin");
 const authGuard = require("./middleware/authGuard");
 
+app.use(express.static(path.join(__dirname, "public")));
 app.use(
   session({
     secret: "secret key",
@@ -78,19 +78,14 @@ fs.readdirSync(path.join(__dirname, "module"))
       );
 
       realRequest(query, request)
-        .then((answer) => {
-          console.log("[OK]", decodeURIComponent(req.originalUrl));
-          res.append("Set-Cookie", answer.cookie);
-          res.status(answer.status).send(answer.body);
+        .then((result) => {
+          res.append("Set-Cookie", result.cookie);
+          res.status(result.status).send(result.body);
         })
-        .catch((answer) => {
-          console.log("[ERR]", decodeURIComponent(req.originalUrl), {
-            status: answer.status,
-            body: answer.body,
-          });
-          if (answer.body.code == "301") answer.body.msg = "需要登录";
-          res.append("Set-Cookie", answer.cookie);
-          res.status(answer.status).send(answer.body);
+        .catch((err) => {
+          if (err.body.code == "301") err.body.msg = "请先登录";
+          res.append("Set-Cookie", err.cookie);
+          res.status(err.status).send(err.body);
         });
     });
   });

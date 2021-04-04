@@ -7,7 +7,7 @@ class UserBlogController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `insert into log (content,releaseTime,like,uid,uname) VALUES ('${blog.content}','${today},0,${blog.uid},'${blog.uname}')`,
+          `insert into log (content,releaseTime,favor,uid,uname,state,picUrl) VALUES ('${blog.content}','${today}',0,${blog.uid},'${blog.uname}',0,'${blog.imgUrl}')`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);
@@ -22,7 +22,7 @@ class UserBlogController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select * from log where uid = ${uid} limit 10 offset ${offset}`,
+          `select log.id,log.content,log.releaseTime,log.favor,log.uname,log.picUrl,user.avatar from log,user where log.uid = ${uid} and log.uid = user.id ORDER BY log.releaseTime DESC limit 10 offset ${offset}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);

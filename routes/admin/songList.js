@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { deleteSongList } = require("../../database/admin/songList");
+const {
+  deleteSongList,
+  getSongListType,
+} = require("../../database/admin/songList");
 
 router.delete("/deleteSongList", async (req, res) => {
   const { slid } = req.query;
@@ -11,6 +14,12 @@ router.delete("/deleteSongList", async (req, res) => {
       desc: "删除成功",
     });
   }
+});
+
+router.get("/getSongListType", async (req, res) => {
+  console.log("goodss");
+  const result = await getSongListType();
+  console.log(result);
 });
 
 module.exports = router;
