@@ -7,9 +7,9 @@ class UserSongListController {
         if (err) reject(err);
         let sql = "";
         if (type && type !== "全部") {
-          sql = `select * from songlist where cate = '${type}'  limit 10 offset ${offset} `;
+          sql = `select count(*) over() as total, s.* from songlist s where s.cate = '${type}'  limit 10 offset ${offset} `;
         } else {
-          sql = `select * from songlist limit 10 offset ${offset}`;
+          sql = `select count(*) over() as total, s.* from songlist s limit 10 offset ${offset}`;
         }
         connection.query(sql, (err, result) => {
           if (err) reject(err);
@@ -187,7 +187,7 @@ class UserSongListController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select * from songList where slname like '%${name}%' limit 10 offset ${offset}`,
+          `select count(*) over() as total,s.* from songlist s where s.slname like '%${name}%' limit 10 offset ${offset}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);

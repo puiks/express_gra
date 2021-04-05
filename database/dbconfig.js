@@ -2,7 +2,7 @@ const mysql = require("mysql");
 const dbconfig = {
   host: "localhost",
   user: "root",
-  password: "root",
+  password: "rootroot",
   database: "cloud_music",
   port: 3306,
   connectionLimit: 20,

@@ -133,8 +133,8 @@ router.post("/addSongIntoSongList", async (req, res) => {
 });
 
 router.get("/getSongListByName", async (req, res) => {
-  const { name } = req.query;
-  const result = await getSongListByName(name);
+  const { name, offset } = req.query;
+  const result = await getSongListByName(name,offset);
   res.send({
     songList: result,
     status: 200,
