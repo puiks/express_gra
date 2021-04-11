@@ -9,7 +9,7 @@ const {
   SubScribeOthers,
   getFans,
   getSubScribe,
-  uploadAvatar,
+  modifyUserInfo,
   getUserInfo,
 } = require("../database/default/user");
 
@@ -70,7 +70,9 @@ router.post("/register", async (req, res) => {
 });
 
 router.get("/mailCode", async (req, res) => {
-  const { mail } = req.query;
+  const {
+    mail
+  } = req.query;
   code = Math.floor(Math.random() * 1000000); // 验证码
   console.log(code);
   time = new Date().getTime(); // 存入验证码生成时的时间戳
@@ -86,7 +88,10 @@ router.get("/mailCode", async (req, res) => {
 });
 
 router.get("/authCode", async (req, res) => {
-  const { code, time } = req.query;
+  const {
+    code,
+    time
+  } = req.query;
   if (time - ntime >= 60 * 1000) {
     res.send({
       status: 403,
@@ -132,7 +137,9 @@ router.get("/logout", (req, res) => {
 });
 
 router.get("/getSubscribeCount", async (req, res) => {
-  const { id } = req.query;
+  const {
+    id
+  } = req.query;
   const result = await getSubscribeCount(id);
   res.send({
     subscribe: result,
@@ -141,7 +148,10 @@ router.get("/getSubscribeCount", async (req, res) => {
 });
 
 router.put("/subscribeOthers", async (req, res) => {
-  const { srcId, tarId } = req.query;
+  const {
+    srcId,
+    tarId
+  } = req.query;
   const result = await SubScribeOthers(srcId, tarId);
   if (result.affectedRows !== 0) {
     res.send({
@@ -157,7 +167,10 @@ router.put("/subscribeOthers", async (req, res) => {
 });
 
 router.get("/getFans", async (req, res) => {
-  const { id, offset } = req.query;
+  const {
+    id,
+    offset
+  } = req.query;
   const result = await getFans(id, offset);
   res.send({
     fans: result,
@@ -166,7 +179,10 @@ router.get("/getFans", async (req, res) => {
 });
 
 router.get("/getSubscribe", async (req, res) => {
-  const { id, offset } = req.query;
+  const {
+    id,
+    offset
+  } = req.query;
   console.log(req.query);
   const result = await getSubScribe(id, offset);
   res.send({
@@ -194,7 +210,13 @@ router.post("/uploadAvatar", (req, res) => {
     const result = await uploadAvatar(req.query.id, "/images/" + imgName);
     // 返回路径和文件名
     if (result.affectedRows !== 0) {
-      res.send({ code: 1, data: { name: imgName, path: imgPath } });
+      res.send({
+        code: 1,
+        data: {
+          name: imgName,
+          path: imgPath
+        }
+      });
     } else {
       res.send({
         status: "上传失败",
@@ -204,11 +226,39 @@ router.post("/uploadAvatar", (req, res) => {
 });
 
 router.get("/getSelfInfo", async (req, res) => {
-  let { id } = req.query;
+  let {
+    id
+  } = req.query;
   const data = await getUserInfo(id);
   res.send({
     status: 200,
     data: data,
   });
 });
+
+router.put("/modifyUserInfo", async (req, res) => {
+  let form = new formidable.IncomingForm();
+  form.encoding = "utf-8"; // 编码
+  // 保留扩展名
+  form.keepExtensions = true;
+  //文件存储路径 最后要注意加 '/' 否则会被存在public下
+  form.uploadDir = path.join(__dirname, "../public/images/");
+  // 解析 formData 数据
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) return next(err);
+    let imgName = files.avatar.path.split('images/')[1];
+    fields.avatar = 'images/' + imgName
+    const result = await modifyUserInfo(fields);
+    if (result.affectedRows) {
+      res.send({
+        status: 200
+      })
+    } else {
+      res.send({
+        status: 500
+      })
+    }
+  });
+})
 module.exports = router;

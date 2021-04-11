@@ -59,12 +59,12 @@ class UserSongListController {
       });
     });
   }
-  updateSongList(songlist, slid, songs) {
+  updateSongList(songlist) {
     return new Promise(function (resolve, reject) {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `update songlist set slname =${songlist.slname},desc = ${songlist.desc} where id = ${slid}`,
+          `update songlist set slname = '${songlist.slname}',descri = '${songlist.desc}', cate = '${songlist.cate}', picUrl = '${songlist.picUrl}' where id = ${songlist.id}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);
@@ -80,7 +80,7 @@ class UserSongListController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `insert into songlist (slname,ownerid,ownername,createTime,state,picUrl) VALUES ('${title}',${userInfo.ownerid},'${userInfo.ownername}','${today}',0,'https://www.hualigs.cn/image/604ccd6f99c05.jpg')`,
+          `insert into songlist (slname,ownerid,ownername,createTime,state,picUrl) VALUES ('${title}',${userInfo.ownerid},'${userInfo.ownername}','${today}',0,'images/109951165474121408.jpeg')`,
           (err, result1) => {
             if (err) reject(err);
             resolve(result1);

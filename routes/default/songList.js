@@ -14,6 +14,9 @@ const {
   getSongListByName,
 } = require("../../database/default/songList");
 
+let formidable = require("formidable");
+let path = require("path");
+
 router.get("/getAllSongLists", async (req, res) => {
   const { offset, type } = req.query;
   console.log(type);
@@ -40,14 +43,32 @@ router.get("/getSongListById", async (req, res) => {
 });
 
 router.put("/updateSongList", async (req, res) => {
-  const { songList, slid } = req.body;
-  const data = await updateSongList(songList, slid);
-  if (data.affectedRows !== 0) {
-    res.send({
-      status: 204,
-      desc: "更新成功",
-    });
-  }
+  let form = new formidable.IncomingForm();
+  form.encoding = "utf-8"; // 编码
+  // 保留扩展名
+  form.keepExtensions = true;
+  //文件存储路径 最后要注意加 '/' 否则会被存在public下
+  form.uploadDir = path.join(__dirname, "../../public/images/");
+  // 解析 formData 数据
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) return next(err);
+    console.log(files);
+    console.log('----');
+    console.log(fields);
+    let imgName = files.picUrl.path.split('images/')[1];
+    fields.picUrl = 'images/' + imgName
+    const result = await updateSongList(fields);
+    if (result.affectedRows) {
+      res.send({
+        status: 204
+      })
+    } else {
+      res.send({
+        status: 500
+      })
+    }
+  });
 });
 
 router.post("/addSongList", async (req, res) => {

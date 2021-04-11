@@ -10,6 +10,7 @@ class UserController {
             `select * from user where username='${loginInfo.username}' and password = '${loginInfo.password}'`,
             function (err, res) {
               if (err) return false;
+              console.log(res);
               resolve(res);
               connection.release();
             }
@@ -159,12 +160,17 @@ class UserController {
       });
     });
   }
-  uploadAvatar(id, url) {
+  modifyUserInfo(Info) {
     return new Promise(function (resolve, reject) {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
-        connection.query(
-          `update user set avatar = '${url}' where id = ${id}`,
+        let sql = ''
+        if (Info.avatar) {
+          sql = `update user set username = '${Info.username}', avatar = '${Info.avatar}', email = '${Info.email}', telephone = '${Info.telephone}', sex= ${Info.sex} where id = ${Info.id}`
+        } else {
+          sql = `update user set username = '${Info.username}', email = '${Info.email}', telephone = '${Info.telephone}', sex= ${Info.sex} where id = ${Info.id}`
+        }
+        connection.query(sql,
           (err, result) => {
             if (err) reject(err);
             resolve(result);
