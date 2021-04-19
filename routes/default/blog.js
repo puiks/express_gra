@@ -38,10 +38,7 @@ router.get("/getBlogByBlogId", async (req, res) => {
 
 router.get("/getBlogByUserId", async (req, res) => {
   const { offset, uid } = req.query;
-  console.log(offset);
-  console.log(uid);
   const result = await getBlogByUserId(uid, offset);
-  console.log(result);
   res.send({
     blogs: result,
     status: 200,

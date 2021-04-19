@@ -153,6 +153,7 @@ router.put("/subscribeOthers", async (req, res) => {
     tarId
   } = req.query;
   const result = await SubScribeOthers(srcId, tarId);
+  console.log(result);
   if (result.affectedRows !== 0) {
     res.send({
       status: 204,
@@ -229,6 +230,7 @@ router.get("/getSelfInfo", async (req, res) => {
   let {
     id
   } = req.query;
+  console.log(id);
   const data = await getUserInfo(id);
   res.send({
     status: 200,

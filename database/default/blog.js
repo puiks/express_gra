@@ -18,11 +18,12 @@ class UserBlogController {
     });
   }
   getBlogByUserId(uid, offset) {
+    console.log('this one');
     return new Promise(function (resolve, reject) {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select log.id,log.content,log.releaseTime,log.favor,log.uname,log.picUrl,user.avatar from log,user where log.uid = ${uid} and log.uid = user.id ORDER BY log.releaseTime DESC limit 10 offset ${offset}`,
+          `select COUNT(log.id) as total, log.id,log.content,log.releaseTime,log.favor,log.uname,log.picUrl,user.avatar from log,user where log.uid = ${uid} and log.uid = user.id limit 10 offset ${offset}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);

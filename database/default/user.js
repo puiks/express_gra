@@ -115,6 +115,7 @@ class UserController {
           `select * from subscribe where srcUserId = ${srcId} and tarUserId = ${TarId}`,
           (err, result) => {
             if (err) reject(err);
+            console.log(result);
             if (result.length) {
               connection.query(
                 `update subscribe set state = 0 where srcUserId = ${srcId} and tarUserId = ${TarId}`,
@@ -124,6 +125,11 @@ class UserController {
                   connection.release();
                 }
               );
+            } else {
+              connection.query(`insert into subscribe (srcUserId,tarUserId,state) values (${srcId}, ${TarId}, 0)`, (err, result) => {
+                if (err) reject(err)
+                resolve(result)
+              })
             }
           }
         );
