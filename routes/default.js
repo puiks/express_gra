@@ -11,6 +11,9 @@ const {
   getSubScribe,
   modifyUserInfo,
   getUserInfo,
+  deFollowOthers,
+  findExist,
+  newSubScribe,
 } = require("../database/default/user");
 
 let authCode = null;
@@ -34,9 +37,7 @@ router.use("/blog", blogRouter);
 
 router.post("/login", async (req, res) => {
   let loginInfo = req.body;
-  console.log(loginInfo);
   const result = await login(loginInfo);
-  console.log(result);
   if (result.length !== 0) {
     req.session.uid = new Date().getTime() + result[0].username;
     res.send({
@@ -74,7 +75,6 @@ router.get("/mailCode", async (req, res) => {
     mail
   } = req.query;
   code = Math.floor(Math.random() * 1000000); // 验证码
-  console.log(code);
   time = new Date().getTime(); // 存入验证码生成时的时间戳
   const result = await mailCode(
     mail,
@@ -140,7 +140,11 @@ router.get("/getSubscribeCount", async (req, res) => {
   const {
     id
   } = req.query;
-  const result = await getSubscribeCount(id);
+  const subscribe = await getSubscribeCount(id);
+  const result = {
+    subscribe: subscribe[0][0].subScribTotal,
+    fans: subscribe[1][0].fansTotal
+  }
   res.send({
     subscribe: result,
     status: 200,
@@ -152,18 +156,35 @@ router.put("/subscribeOthers", async (req, res) => {
     srcId,
     tarId
   } = req.query;
-  const result = await SubScribeOthers(srcId, tarId);
-  console.log(result);
-  if (result.affectedRows !== 0) {
-    res.send({
-      status: 204,
-      desc: "关注成功",
-    });
+  const result = await findExist(srcId, tarId);
+  if (result.length) {
+    const result2 = await SubScribeOthers(srcId, tarId);
+    console.log(result2);
+    if (result2.affectedRows !== 0) {
+      res.send({
+        status: 204,
+        desc: "关注成功",
+      });
+    } else {
+      res.send({
+        status: 500,
+        desc: "关注失败",
+      });
+    }
   } else {
-    res.send({
-      status: 500,
-      desc: "关注失败",
-    });
+    const result3 = await newSubScribe(srcId, tarId);
+    console.log(result3);
+    if (result3.affectedRows !== 0) {
+      res.send({
+        status: 204,
+        desc: "关注成功",
+      });
+    } else {
+      res.send({
+        status: 500,
+        desc: "关注失败",
+      });
+    }
   }
 });
 
@@ -184,10 +205,10 @@ router.get("/getSubscribe", async (req, res) => {
     id,
     offset
   } = req.query;
-  console.log(req.query);
   const result = await getSubScribe(id, offset);
+  console.log(result);
   res.send({
-    subsribe: result,
+    subscribe: result,
     status: 200,
   });
 });
@@ -203,8 +224,6 @@ router.post("/uploadAvatar", (req, res) => {
 
   form.parse(req, async (err, fields, files) => {
     if (err) return next(err);
-    console.log(fields);
-    console.log(files);
     let imgPath = files.avatar.path;
     let imgName = files.avatar.name;
     // let realName = imgPath.split(`public\\`)[1]
@@ -230,7 +249,6 @@ router.get("/getSelfInfo", async (req, res) => {
   let {
     id
   } = req.query;
-  console.log(id);
   const data = await getUserInfo(id);
   res.send({
     status: 200,
@@ -262,5 +280,25 @@ router.put("/modifyUserInfo", async (req, res) => {
       })
     }
   });
+})
+
+router.put("/deFollowOthers", async (req, res) => {
+  const {
+    srcId,
+    tarId
+  } = req.query
+  const result = await deFollowOthers(srcId, tarId)
+  console.log(result);
+  if (result.affectedRows !== 0) {
+    res.send({
+      status: 204,
+      desc: '取消订阅成功'
+    })
+  } else {
+    res.send({
+      status: 500,
+      desc: '取消订阅失败'
+    })
+  }
 })
 module.exports = router;

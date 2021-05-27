@@ -54,9 +54,6 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// cache处理;
-app.use(cache("2 minutes", (req, res) => res.statusCode === 200));
-
 fs.readdirSync(path.join(__dirname, "module"))
   .reverse()
   .forEach((file) => {
@@ -88,6 +85,9 @@ fs.readdirSync(path.join(__dirname, "module"))
           res.status(err.status).send(err.body);
         });
     });
+    // cache处理;
+    app.use(route, cache("2 minutes", (req, res) => res.statusCode === 200));
+
   });
 
 app.use("/user", userRouter);

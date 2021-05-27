@@ -20,7 +20,7 @@ class AdminSongListController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          "select COUNT(cate) as '该类总数' , cate from songlist group by cate",
+          "select COUNT(cate) as 'total' , cate from songlist group by cate",
           (err, result) => {
             if (err) reject(err);
             resolve(result);

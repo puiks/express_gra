@@ -12,6 +12,7 @@ const {
   getCollectSongList,
   addSongIntoSongList,
   getSongListByName,
+  findCollect
 } = require("../../database/default/songList");
 
 let formidable = require("formidable");
@@ -109,12 +110,12 @@ router.delete("/unCollectSongList", async (req, res) => {
   if (result.affectedRows !== 0) {
     res.send({
       status: 204,
-      desc: "添加成功",
+      desc: "取消收藏成功",
     });
   } else {
     res.send({
       status: 500,
-      desc: "添加失败",
+      desc: "取消收藏失败",
     });
   }
 });
@@ -161,5 +162,14 @@ router.get("/getSongListByName", async (req, res) => {
     status: 200,
   });
 });
+
+router.get("/findCollect", async (req, res) => {
+  const { id } = req.query
+  const result = await findCollect(id)
+  res.send({
+    songList: result,
+    status: 200
+  })
+})
 
 module.exports = router;

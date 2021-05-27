@@ -88,60 +88,64 @@ class UserController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select COUNT(*) from subscribe where tarUserId = ${id}`,
-          (err, result1) => {
+          `select COUNT(*) as subScribTotal from subscribe where srcUserId = ${id} and state = 0;select COUNT(*) as fansTotal from subscribe where tarUserId = ${id} and state = 0`,
+          (err, result) => {
             if (err) reject(err);
-            connection.query(
-              `select COUNT(*) from subscribe where srcUserId = ${id}`,
-              (err, result2) => {
-                if (err) reject(err);
-                resolve({
-                  fans: result1[0]["COUNT(*)"],
-                  subscribe: result2[0]["COUNT(*)"],
-                });
-                connection.release();
-              }
-            );
+            resolve(result)
+            connection.release()
           }
         );
       });
     });
+  }
+  getFansCount(id) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err)
+        connection.query(
+          `select COUNT(*) as total from subscribe where tarUserId = ${id} and state = 0`,
+          (err, result) => {
+            if (err) reject(err);
+            resolve(result);
+            connection.release();
+          }
+        );
+      })
+    })
   }
   SubScribeOthers(srcId, TarId) {
     return new Promise(function (resolve, reject) {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select * from subscribe where srcUserId = ${srcId} and tarUserId = ${TarId}`,
-          (err, result) => {
+          `update subscribe set state = 0 where srcUserId = ${srcId} and tarUserId = ${TarId}`,
+          (err, result2) => {
             if (err) reject(err);
-            console.log(result);
-            if (result.length) {
-              connection.query(
-                `update subscribe set state = 0 where srcUserId = ${srcId} and tarUserId = ${TarId}`,
-                (err, result2) => {
-                  if (err) reject(err);
-                  resolve(result2);
-                  connection.release();
-                }
-              );
-            } else {
-              connection.query(`insert into subscribe (srcUserId,tarUserId,state) values (${srcId}, ${TarId}, 0)`, (err, result) => {
-                if (err) reject(err)
-                resolve(result)
-              })
-            }
+            resolve(result2);
+            connection.release();
           }
-        );
+        )
       });
     });
+  }
+  newSubScribe(srcId, tarId) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err);
+        connection.query(`insert into subscribe (srcUserId,tarUserId,state) values (${srcId}, ${tarId}, 0)`, (err, result) => {
+          if (err) reject(err)
+          resolve(result)
+          connection.release();
+        })
+      })
+    })
   }
   getSubScribe(id, offset) {
     return new Promise(function (resolve, reject) {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select * from subscribe,user where subscribe.srcUserId = ${id} and subscribe.srcUserId = user.id limit 10 offset ${offset}`,
+          `select * from subscribe,user where subscribe.srcUserId = ${id} and user.id = subscribe.tarUserId and subscribe.state = 0 limit 10 offset ${offset}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);
@@ -156,7 +160,7 @@ class UserController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select * from subscribe,user where subscribe.tarUserId = ${id} and subscribe.tarUserId = user.id limit 10 offset ${offset}`,
+          `select * from subscribe,user where subscribe.tarUserId = ${id} and subscribe.srcUserId = user.id and subscribe.state = 0 limit 10 offset ${offset}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);
@@ -200,6 +204,30 @@ class UserController {
         );
       });
     });
+  }
+  deFollowOthers(srcId, tarId) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err)
+        connection.query(`update subscribe set state = 1 where srcUserId = ${srcId} and tarUserId = ${tarId}`, (err, result) => {
+          if (err) reject(err)
+          resolve(result)
+          connection.release()
+        })
+      })
+    })
+  }
+  findExist(srcId, tarId) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err)
+        connection.query(`select * from subscribe where srcUserId = ${srcId} and tarUserId = ${tarId}`, (err, result) => {
+          if (err) reject(err)
+          resolve(result)
+          connection.release()
+        })
+      })
+    })
   }
 }
 

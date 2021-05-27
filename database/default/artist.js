@@ -35,7 +35,7 @@ class UserArtistController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select * from artist where id = ${type} limit 10 offset ${offset}`,
+          `select * from artists where id = ${type} limit 30 offset ${offset}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);

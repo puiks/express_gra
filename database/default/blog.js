@@ -23,7 +23,7 @@ class UserBlogController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select COUNT(log.id) as total, log.id,log.content,log.releaseTime,log.favor,log.uname,log.picUrl,user.avatar from log,user where log.uid = ${uid} and log.uid = user.id limit 10 offset ${offset}`,
+          `select log.id,log.content,log.releaseTime,log.favor,log.uname,log.picUrl,user.avatar from log,user where log.uid = ${uid} and log.uid = user.id limit 10 offset ${offset}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);
@@ -53,7 +53,7 @@ class UserBlogController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `update log set favor = ${like + 1} where id = ${bid}`,
+          `update log set favor = ${+like + 1} where id = ${bid}`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);
@@ -62,6 +62,18 @@ class UserBlogController {
         );
       });
     });
+  }
+  getBlogCount(uid) {
+    return new Promise(function(resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) resolve(err);
+        connection.query(`select COUNT(*) as total from log where uid = ${uid}`, (err, result) => {
+          if (err) reject(err);
+          resolve(result);
+          connection.release();
+        })
+      })
+    })
   }
 }
 

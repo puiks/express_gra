@@ -17,9 +17,11 @@ router.delete("/deleteSongList", async (req, res) => {
 });
 
 router.get("/getSongListType", async (req, res) => {
-  console.log("goodss");
   const result = await getSongListType();
-  console.log(result);
+  res.send({
+    analysisList: result,
+    status: 200
+  })
 });
 
 module.exports = router;

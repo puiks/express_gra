@@ -5,8 +5,9 @@ const dbconfig = {
   password: "rootroot",
   database: "cloud_music",
   port: 3306,
-  connectionLimit: 20,
+  connectionLimit: 50,
   timezone: "SYSTEM",
+  multipleStatements: true
 };
 const pool = mysql.createPool(dbconfig);
 

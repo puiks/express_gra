@@ -8,6 +8,7 @@ const {
   getBlogByBlogId,
   getBlogByUserId,
   likeBlog,
+  getBlogCount
 } = require("../../database/default/blog");
 
 router.post("/releaseBlog", async (req, res) => {
@@ -31,7 +32,7 @@ router.get("/getBlogByBlogId", async (req, res) => {
   const { offset, bid } = req.query;
   const result = await getBlogByBlogId(bid, offset);
   res.send({
-    blog: result[0],
+    blog: result,
     status: 200,
   });
 });
@@ -39,6 +40,7 @@ router.get("/getBlogByBlogId", async (req, res) => {
 router.get("/getBlogByUserId", async (req, res) => {
   const { offset, uid } = req.query;
   const result = await getBlogByUserId(uid, offset);
+  console.log(result);
   res.send({
     blogs: result,
     status: 200,
@@ -47,7 +49,7 @@ router.get("/getBlogByUserId", async (req, res) => {
 
 router.put("/likeBlog", async (req, res) => {
   const { like, bid } = req.query;
-  const result = await getBlogByUserId(like, bid);
+  const result = await likeBlog(like, bid);
   if (result.affectedRows !== 0) {
     res.send({
       status: 204,
@@ -89,5 +91,14 @@ router.post("/uploadPicture", async (req, res) => {
     });
   });
 });
+
+router.get('/getBlogCount', async (req, res) => {
+  const { uid } = req.query
+  const result = await getBlogCount(uid);
+  res.send({
+    status: 200,
+    total: result[0]
+  })
+})
 
 module.exports = router;

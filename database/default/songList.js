@@ -109,7 +109,7 @@ class UserSongListController {
               );
             } else {
               connection.query(
-                `insert into sltouser (slid,uid,state) VALUE ${slid},${uid},0`,
+                `insert into sltouser (slid,uid,state) VALUES (${slid},${uid},0)`,
                 (err, result2) => {
                   if (err) reject(err);
                   resolve(result2);
@@ -157,7 +157,7 @@ class UserSongListController {
       pool.getConnection((err, connection) => {
         if (err) reject(err);
         connection.query(
-          `select * from sltouser, songlist where sltouser.uid = ${id} and sltouser.slid = songlist.id`,
+          `select * from sltouser, songlist where sltouser.uid = ${id} and sltouser.slid = songlist.id and sltouser.state = 0`,
           (err, result) => {
             if (err) reject(err);
             resolve(result);
@@ -196,6 +196,18 @@ class UserSongListController {
         );
       });
     });
+  }
+  findCollect(id) {
+    return new Promise(function(resolve, reject) {
+      pool.getConnection((err, connection) => {
+        if (err) reject(err)
+        connection.query(`select * from sltouser where slid = ${id} and state = 0`, (err, result) => {
+          if (err) reject(err)
+          resolve(result);
+          connection.release()
+        })
+      })
+    })
   }
 }
 
